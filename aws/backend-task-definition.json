@@ -1,0 +1,60 @@
+{
+  "family": "azspider-backend",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::589288742364:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::589288742364:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "azspider-backend",
+      "image": "589288742364.dkr.ecr.us-east-1.amazonaws.com/azspider-backend:latest",
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "production"
+        },
+        {
+          "name": "PORT",
+          "value": "8000"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "OPENAI_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:589288742364:secret:azspider/openai-api-key"
+        },
+        {
+          "name": "PHONE_VALIDATION_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:589288742364:secret:azspider/phone-api-key"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/azspider-backend",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:8000/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    }
+  ]
+}

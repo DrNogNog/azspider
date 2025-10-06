@@ -1,6 +1,7 @@
 import { useAuth } from '../contexts/AuthContext';
 import { Search, LogOut, CreditCard, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 
 interface DashboardProps {
   onCheckout: () => void;
@@ -120,7 +121,7 @@ function ResearchForm() {
     setError(null);
 
     try {
-      const response = await fetch('/api/search', {
+      const response = await fetch(API_ENDPOINTS.SEARCH, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

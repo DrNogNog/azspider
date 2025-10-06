@@ -1,7 +1,18 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Try multiple ways to get environment variables
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 
+                   (typeof window !== 'undefined' && (window as any).__SUPABASE_URL__) ||
+                   process.env.VITE_SUPABASE_URL;
+
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 
+                       (typeof window !== 'undefined' && (window as any).__SUPABASE_ANON_KEY__) ||
+                       process.env.VITE_SUPABASE_ANON_KEY;
+
+// Debug logging for production
+console.log('[DEBUG] Supabase URL:', supabaseUrl ? 'Present' : 'Missing');
+console.log('[DEBUG] Supabase Anon Key:', supabaseAnonKey ? 'Present' : 'Missing');
+console.log('[DEBUG] All env vars:', import.meta.env);
 
 let supabase: SupabaseClient;
 

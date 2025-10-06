@@ -15,4 +15,15 @@ export default defineConfig({
       },
     },
   },
+  define: {
+    // Make environment variables available at build time
+    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(process.env.VITE_SUPABASE_URL || ''),
+    'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY || ''),
+  },
+  build: {
+    // Ensure environment variables are included in build
+    rollupOptions: {
+      external: [],
+    },
+  },
 });

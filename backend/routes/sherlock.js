@@ -18,7 +18,17 @@ const openai = new OpenAI({
 router.post('/search', async (req, res) => {
   try {
     console.log('Received request:', req.body);
+    console.log('Environment check - OpenAI API Key:', process.env.OPENAI_API_KEY ? 'Present' : 'Missing');
+    
     const { email, phone, username, name } = req.body;
+    
+    // Validate required inputs
+    if (!email && !phone && !username && !name) {
+      return res.status(400).json({
+        success: false,
+        error: 'At least one input field (email, phone, username, or name) is required'
+      });
+    }
 
     // Initialize response structure
     const response = {
@@ -46,7 +56,7 @@ router.post('/search', async (req, res) => {
     if (phone) {
       try {
         const apiUrl = 'http://apilayer.net/api/validate';
-        const accessKey = 'cc802b8e8010ceb29f3f7f6284678a51';
+        const accessKey = process.env.PHONE_VALIDATION_API_KEY || 'cc802b8e8010ceb29f3f7f6284678a51';
         
         const phoneResponse = await fetch(`${apiUrl}?access_key=${accessKey}&number=${encodeURIComponent(phone)}`, {
           timeout: 10000 // 10 second timeout for phone validation
@@ -79,12 +89,25 @@ router.post('/search', async (req, res) => {
         ];
         
         // First try: Use the local sherlock installation
-        const localSherlockPath = path.join(process.cwd(), 'sherlock_project', 'sherlock_project', '.venv', 'Scripts', 'python.exe');
+        const localSherlockPath = path.join(process.cwd(), 'sherlock_project', 'sherlock_project', '.venv', 'bin', 'python');
         const sherlockScriptPath = path.join(process.cwd(), 'sherlock_project', 'sherlock_project', 'sherlock.py');
+        
+        // Alternative: Try direct python command if venv doesn't work
+        const alternativePythonPath = 'python3';
         
         if (fs.existsSync(localSherlockPath) && fs.existsSync(sherlockScriptPath)) {
           console.log('Using local sherlock installation');
           sherlockCommand = localSherlockPath;
+          sherlockArgs = [
+            sherlockScriptPath, 
+            username, 
+            '--print-all',
+            '--timeout', '5',
+            '--nsfw'
+          ];
+        } else if (fs.existsSync(sherlockScriptPath)) {
+          console.log('Using system python with sherlock script');
+          sherlockCommand = alternativePythonPath;
           sherlockArgs = [
             sherlockScriptPath, 
             username, 

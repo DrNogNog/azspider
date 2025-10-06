@@ -4,7 +4,7 @@ const Stripe = require('stripe');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2022-11-15' });
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-09-30.clover' });
 
 // Use raw body for webhook signature verification
 app.use(
@@ -16,6 +16,11 @@ app.use(
 );
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
 
 // Helper function to update user subscription status
 const updateUserSubscriptionStatus = async (customerEmail, isPaid, stripeCustomerId = null, subscriptionEndDate = null) => {
