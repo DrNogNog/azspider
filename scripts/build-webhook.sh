@@ -28,3 +28,4 @@ docker push ${ECR_URI}
 
 echo "Webhook image pushed successfully!"
 echo "ECR URI: ${ECR_URI}"
+

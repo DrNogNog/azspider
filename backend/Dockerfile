@@ -39,6 +39,9 @@ RUN /usr/src/app/sherlock_project/sherlock_project/.venv/bin/pip install \
     "openpyxl>=3.0.10" \
     "tomli>=2.2.1"
 
+# Install the official sherlock CLI so we can use supported entry points
+RUN /usr/src/app/sherlock_project/sherlock_project/.venv/bin/pip install sherlock-project
+
 # Change ownership to the backend user
 RUN chown -R backend:backend /usr/src/app
 

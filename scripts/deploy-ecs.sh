@@ -44,3 +44,4 @@ aws ecs update-service \
 echo "Deployment initiated! Check ECS console for status."
 echo "Backend service: ${BACKEND_SERVICE}"
 echo "Webhook service: ${WEBHOOK_SERVICE}"
+

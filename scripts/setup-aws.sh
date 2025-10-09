@@ -46,3 +46,5 @@ echo "1. Create secrets in AWS Secrets Manager"
 echo "2. Run: ./scripts/build-backend.sh"
 echo "3. Run: ./scripts/build-webhook.sh"
 echo "4. Run: ./scripts/deploy-ecs.sh"
+
+

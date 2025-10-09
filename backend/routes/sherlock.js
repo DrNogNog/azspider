@@ -88,35 +88,42 @@ router.post('/search', async (req, res) => {
           '--nsfw'           // Include NSFW sites
         ];
         
-        // First try: Use the local sherlock installation
-        const localSherlockPath = path.join(process.cwd(), 'sherlock_project', 'sherlock_project', '.venv', 'bin', 'python');
+        // Prefer invoking via installed CLI in the virtual environment
+        const venvBin = path.join(process.cwd(), 'sherlock_project', 'sherlock_project', '.venv', 'bin');
+        const sherlockCli = path.join(venvBin, 'sherlock');
+        const pythonCli = path.join(venvBin, 'python');
         const sherlockScriptPath = path.join(process.cwd(), 'sherlock_project', 'sherlock_project', 'sherlock.py');
-        
-        // Alternative: Try direct python command if venv doesn't work
-        const alternativePythonPath = 'python3';
-        
-        if (fs.existsSync(localSherlockPath) && fs.existsSync(sherlockScriptPath)) {
-          console.log('Using local sherlock installation');
-          sherlockCommand = localSherlockPath;
+
+        console.log('Checking executables:', { sherlockCli, pythonCli, sherlockScriptPath });
+
+        if (fs.existsSync(sherlockCli)) {
+          console.log('Using sherlock CLI from venv');
+          sherlockCommand = sherlockCli;
           sherlockArgs = [
-            sherlockScriptPath, 
-            username, 
+            username,
             '--print-all',
             '--timeout', '5',
             '--nsfw'
           ];
-        } else if (fs.existsSync(sherlockScriptPath)) {
-          console.log('Using system python with sherlock script');
-          sherlockCommand = alternativePythonPath;
+        } else if (fs.existsSync(pythonCli) && fs.existsSync(sherlockScriptPath)) {
+          console.log('Using venv python with sherlock.py');
+          sherlockCommand = pythonCli;
           sherlockArgs = [
-            sherlockScriptPath, 
-            username, 
+            sherlockScriptPath,
+            username,
             '--print-all',
             '--timeout', '5',
             '--nsfw'
           ];
         } else {
-          console.log('Trying global sherlock command');
+          console.log('Falling back to PATH sherlock');
+          sherlockCommand = 'sherlock';
+          sherlockArgs = [
+            username,
+            '--print-all',
+            '--timeout', '5',
+            '--nsfw'
+          ];
         }
         
         // Run sherlock with supported arguments only
@@ -172,8 +179,7 @@ router.post('/search', async (req, res) => {
             response.data.socialMedia.error = sherlock.error.message;
           }
         } else if (sherlock.status !== 0) {
-          console.error('Sherlock failed with status:', sherlock.status);
-          response.data.socialMedia.error = sherlock.stderr || 'Sherlock failed';
+          response.data.socialMedia.error = `Sherlock failed (status ${sherlock.status}): ${sherlock.stderr || sherlock.stdout || 'No error details available'}`;
         } else {
           // Parse working links
           const lines = sherlock.stdout.split('\n').filter(Boolean);

@@ -1,13 +1,15 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Try multiple ways to get environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 
-                   (typeof window !== 'undefined' && (window as any).__SUPABASE_URL__) ||
-                   process.env.VITE_SUPABASE_URL;
+// Try multiple ways to get environment variables. Avoid direct `process` access in the browser.
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL ||
+  (typeof window !== 'undefined' && (window as any).__SUPABASE_URL__) ||
+  (typeof process !== 'undefined' && (process as any).env ? (process as any).env.VITE_SUPABASE_URL : undefined);
 
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 
-                       (typeof window !== 'undefined' && (window as any).__SUPABASE_ANON_KEY__) ||
-                       process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  (typeof window !== 'undefined' && (window as any).__SUPABASE_ANON_KEY__) ||
+  (typeof process !== 'undefined' && (process as any).env ? (process as any).env.VITE_SUPABASE_ANON_KEY : undefined);
 
 // Debug logging for production
 console.log('[DEBUG] Supabase URL:', supabaseUrl ? 'Present' : 'Missing');
